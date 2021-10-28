@@ -13,7 +13,7 @@ class MegaBinary(models.Model):
 
 class MegaFile(models.Model):
     owner = models.ForeignKey(MegaUser, related_name="files", on_delete=models.DO_NOTHING)
-    id = models.CharField(primary_key=True, default=uuid.uuid4(), max_length=255)
+    id = models.CharField(primary_key=True, default=uuid.uuid4, max_length=255)
     parent = models.ForeignKey("self", on_delete=models.CASCADE, null=True, blank=True)
     binary = models.OneToOneField(
         MegaBinary, on_delete=models.CASCADE, blank=True, null=True
@@ -28,9 +28,9 @@ class MegaFile(models.Model):
     downloadUrl = models.CharField(max_length=512, blank=True, default=None)
     addDate = models.DateTimeField(auto_now_add=True)
 
-    def save(self, *args, **kwargs):
-        self.serverFileName = f"{uuid.uuid4().int}.{self.extension}"
-        super(MegaFile, self).save(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     self.serverFileName = f"{uuid.uuid4().int}.{self.extension}"
+    #     super(MegaFile, self).save(*args, **kwargs)
 
     def __str__(self) -> str:
         return self.fileName

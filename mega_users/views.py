@@ -4,13 +4,13 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from .decorators import check_mega_user_existance
+from .decorators import check_mega_user_exists
 from .models import MegaRate, MegaUser
 from .serializers import MegaUserReadSerializer
 
 
 @api_view(["GET"])
-@check_mega_user_existance
+@check_mega_user_exists
 def get_user_info(request, external_id):
     mega_user = MegaUser.objects.get(external_id=external_id)
     return Response(

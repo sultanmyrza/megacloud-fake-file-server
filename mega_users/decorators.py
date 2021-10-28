@@ -5,13 +5,13 @@ from rest_framework.response import Response
 from .models import MegaUser
 
 
-def check_mega_user_existance(function):
+def check_mega_user_exists(function):
     def wrap(request, *args, **kwargs):
         try:
-            external_id = kwargs["external_id"]
-            MegaUser.objects.get(external_id=external_id)
+            user_external_id = kwargs["user_external_id"]
+            MegaUser.objects.get(external_id=user_external_id)
         except MegaUser.DoesNotExist:
-            data = {"id": external_id, "message": "Can't find this user"}
+            data = {"id": user_external_id, "message": "Can't find this user"}
             return Response(status=status.HTTP_409_CONFLICT, data=data)
         return function(request, *args, **kwargs)
 

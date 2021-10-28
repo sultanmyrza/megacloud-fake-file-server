@@ -17,4 +17,10 @@ class MegaBinarySerializer(serializers.ModelSerializer):
 
 class CreateDirectoryRequestSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=200)
-    dir_id = serializers.CharField(max_length=200)
+    dirId = serializers.CharField(max_length=200, allow_null=True)
+
+
+class CreateDirectoryResponseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MegaFile
+        fields = ["id", "fileName", "type", "serverFileName", "addDate"]
