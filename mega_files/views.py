@@ -3,6 +3,7 @@ from datetime import timedelta
 from wsgiref.util import FileWrapper
 
 from django.conf import settings
+from django.db.models import F
 from django.http import HttpResponse
 from django.utils import timezone
 from mega_users.decorators import check_mega_user_exists
@@ -20,6 +21,8 @@ from .serializer import (
     CreateFileResponseSerializer,
     GetTemporaryDownloadUrlRequest,
     GetTemporaryDownloadUrlResponse,
+    MegaListItemDirectorySerializer,
+    MegaListItemFileSerializer,
 )
 
 
@@ -215,3 +218,75 @@ def download_file(request, user_external_id, server_file_name):
     response = HttpResponse(FileWrapper(document), content_type="*/*")
     response["Content-Disposition"] = 'attachment; filename="%s"' % mega_file.fileName
     return response
+
+
+@api_view(["GET"])
+@check_mega_user_exists
+def get_files_from_root_directory(request, user_external_id):
+    # get mega user
+    mega_user = MegaUser.objects.get(external_id=user_external_id)
+
+    # TODO: get sort direction
+    limit = int(request.query_params.get("limit", "10"))
+    offset = int(request.query_params.get("offset", "0"))
+    direction = request.query_params.get("direction", "asc")
+    field = request.query_params.get("field", "addDate")
+
+    mega_files = (
+        mega_user.files.order_by(F(field).asc())
+        if direction == "asc"
+        else mega_user.files.order_by(F(field).desc())
+    )
+
+    start = offset
+    end = min(offset + limit, len(mega_files))
+    mega_files = mega_files[start:end]
+
+    data = []
+    for item in mega_files:
+        if item.type == "directory":
+            data.append(MegaListItemDirectorySerializer(item).data)
+        else:
+            data.append(MegaListItemFileSerializer(item).data)
+
+    return Response(
+        data=data,
+        status=status.HTTP_200_OK,
+    )
+
+
+@api_view(["GET"])
+@check_mega_user_exists
+def get_files_from_specific_directory(request, dir_id, user_external_id):
+    # get mega user
+    mega_user = MegaUser.objects.get(external_id=user_external_id)
+
+    # TODO: get sort direction
+    limit = int(request.query_params.get("limit", "10"))
+    offset = int(request.query_params.get("offset", "0"))
+    direction = request.query_params.get("direction", "asc")
+    field = request.query_params.get("field", "addDate")
+
+    mega_files = mega_user.files.filter(parent__id=dir_id)
+
+    mega_files = (
+        mega_files.order_by(F(field).asc())
+        if direction == "asc"
+        else mega_files.order_by(F(field).desc())
+    )
+
+    start = offset
+    end = min(offset + limit, len(mega_files))
+    mega_files = mega_files[start:end]
+
+    data = []
+    for item in mega_files:
+        if item.type == "directory":
+            data.append(MegaListItemDirectorySerializer(item).data)
+        else:
+            data.append(MegaListItemFileSerializer(item).data)
+
+    return Response(
+        data=data,
+        status=status.HTTP_200_OK,
+    )

@@ -66,3 +66,30 @@ class GetTemporaryDownloadUrlResponse(serializers.ModelSerializer):
             "downloadUrl",
             "addDate",
         ]
+
+
+class MegaListItemFileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MegaFile
+        fields = [
+            "id",
+            "fileName",
+            "extension",
+            "preview",
+            "type",
+            "uploadUrl",
+            "serverFileName",
+            "addDate",
+        ]
+
+
+class MegaListItemDirectorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MegaFile
+        fields = [
+            "id",
+            "fileName",
+            "type",
+            "serverFileName",
+            "addDate",
+        ]

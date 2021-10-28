@@ -2,7 +2,6 @@ from django.urls.conf import path
 
 from . import views
 
-
 urlpatterns = [
     path(
         "resource/dir/users/<str:user_external_id>",
@@ -13,5 +12,15 @@ urlpatterns = [
         "resource/files/<str:file_id>/users/<str:user_external_id>",
         views.get_temporary_download_url,
         name="get_temporary_download_url",
+    ),
+    path(
+        "resource/files/users/<str:user_external_id>",
+        views.get_files_from_root_directory,
+        name="get_files_from_root_directory",
+    ),
+    path(
+        "resource/dir/<str:dir_id>/users/<str:user_external_id>",
+        views.get_files_from_specific_directory,
+        name="get_files_from_specific_directory",
     ),
 ]
