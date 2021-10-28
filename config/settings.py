@@ -40,7 +40,9 @@ DJANGO_APPS = [
     "django.contrib.staticfiles",
 ]
 
-PROJECT_APPS = []
+PROJECT_APPS = [
+    "mega_users",
+]
 
 THIRD_PARTY_APP = [
     "rest_framework",
