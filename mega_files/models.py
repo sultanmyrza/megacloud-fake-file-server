@@ -23,9 +23,10 @@ class MegaFile(models.Model):
     extension = models.CharField(max_length=16)
     type = models.CharField(max_length=255)
     size = models.BigIntegerField()
-    preview = models.CharField(max_length=512, blank=True, default=None)
-    uploadUrl = models.CharField(max_length=512, blank=True, default=None)
-    downloadUrl = models.CharField(max_length=512, blank=True, default=None)
+    preview = models.CharField(max_length=512, default="", blank=True)
+    uploadUrl = models.CharField(max_length=512, default="", blank=True)
+    downloadUrl = models.CharField(max_length=512, default="", blank=True)
+    downloadUrlExpireDate = models.DateTimeField(auto_now_add=True, blank=True)
     addDate = models.DateTimeField(auto_now_add=True)
 
     # def save(self, *args, **kwargs):

@@ -46,3 +46,23 @@ class CreateFileResponseSerializer(serializers.ModelSerializer):
             "uploadUrl",
             "addDate",
         ]
+
+
+class GetTemporaryDownloadUrlRequest(serializers.Serializer):
+    hour = serializers.IntegerField(min_value=1, max_value=168)
+
+
+class GetTemporaryDownloadUrlResponse(serializers.ModelSerializer):
+    class Meta:
+        model = MegaFile
+        fields = [
+            "id",
+            "fileName",
+            "serverFileName",
+            "extension",
+            "preview",
+            "type",
+            "uploadUrl",
+            "downloadUrl",
+            "addDate",
+        ]
