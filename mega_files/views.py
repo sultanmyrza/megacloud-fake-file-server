@@ -263,8 +263,15 @@ def get_files_from_root_directory(request, user_external_id):
     )
 
 
-@api_view(["GET"])
+@api_view(["GET", "DELETE"])
 @check_mega_user_exists
+def specific_directory_related_actions(request, dir_id, user_external_id):
+    if request.method == "GET":
+        return get_files_from_specific_directory(request, dir_id, user_external_id)
+    elif request.method == "DELETE":
+        return delete_directory_with_its_children(request, dir_id, user_external_id)
+
+
 def get_files_from_specific_directory(request, dir_id, user_external_id):
     # get mega user
     mega_user = MegaUser.objects.get(external_id=user_external_id)
@@ -298,6 +305,23 @@ def get_files_from_specific_directory(request, dir_id, user_external_id):
         data=data,
         status=status.HTTP_200_OK,
     )
+
+
+def delete_directory_with_its_children(request, dir_id, user_external_id):
+    files_to_crawl = [MegaFile.objects.get(id=dir_id)]
+    files_to_deleted = []
+
+    while len(files_to_crawl) > 0:
+        curr_file = files_to_crawl.pop()
+        curr_file_children = MegaFile.objects.filter(parent_id=curr_file.id)
+        files_to_crawl.extend(curr_file_children)
+
+        files_to_deleted.append(curr_file)
+
+    for f in files_to_deleted:
+        f.delete()
+
+    return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 def delete_by_id_file_or_directory(request, file_id, user_external_id):

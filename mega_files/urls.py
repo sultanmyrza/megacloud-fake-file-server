@@ -20,7 +20,7 @@ urlpatterns = [
     ),
     path(
         "resource/dir/<str:dir_id>/users/<str:user_external_id>",
-        views.get_files_from_specific_directory,
-        name="get_files_from_specific_directory",
+        views.specific_directory_related_actions,
+        name="specific_directory_related_actions",
     ),
 ]
