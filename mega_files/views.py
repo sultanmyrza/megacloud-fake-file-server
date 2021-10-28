@@ -142,8 +142,16 @@ def upload_mega_binary_file(request, mega_file_id, file_name, format=None):
     return Response(status=status.HTTP_200_OK)
 
 
-@api_view(["POST"])
+@api_view(["POST", "DELETE"])
 @check_mega_user_exists
+def specific_file_related_actions(request, file_id, user_external_id):
+    if request.method == "POST":
+        return get_temporary_download_url(request, file_id, user_external_id)
+
+    if request.method == "DELETE":
+        return delete_by_id_file_or_directory(request, file_id, user_external_id)
+
+
 def get_temporary_download_url(request, file_id, user_external_id):
     # get mega file
     serializer = GetTemporaryDownloadUrlRequest(data=request.data)
@@ -290,3 +298,10 @@ def get_files_from_specific_directory(request, dir_id, user_external_id):
         data=data,
         status=status.HTTP_200_OK,
     )
+
+
+def delete_by_id_file_or_directory(request, file_id, user_external_id):
+    # TODO: check if file belongs to user
+    MegaFile.objects.get(id=file_id).delete()
+    # TODO: delete binary file to free disk space
+    return Response(status=status.HTTP_204_NO_CONTENT)

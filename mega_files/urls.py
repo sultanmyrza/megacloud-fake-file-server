@@ -10,8 +10,8 @@ urlpatterns = [
     ),
     path(
         "resource/files/<str:file_id>/users/<str:user_external_id>",
-        views.get_temporary_download_url,
-        name="get_temporary_download_url",
+        views.specific_file_related_actions,
+        name="specific_file_related_actions",
     ),
     path(
         "resource/files/users/<str:user_external_id>",
