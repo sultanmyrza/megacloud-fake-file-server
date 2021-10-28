@@ -6,7 +6,7 @@ from . import views
 urlpatterns = [
     path(
         "resource/dir/users/<str:user_external_id>",
-        views.create_directory,
-        name="create_directory",
+        views.create_file_or_directory,
+        name="create_file_or_directory",
     ),
 ]

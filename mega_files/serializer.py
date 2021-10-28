@@ -24,3 +24,25 @@ class CreateDirectoryResponseSerializer(serializers.ModelSerializer):
     class Meta:
         model = MegaFile
         fields = ["id", "fileName", "type", "serverFileName", "addDate"]
+
+
+class CreateFileRequestSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=200)
+    size = serializers.IntegerField()
+    extension = serializers.CharField(max_length=150)
+    dirId = serializers.CharField(max_length=200, allow_null=True)
+
+
+class CreateFileResponseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MegaFile
+        fields = [
+            "id",
+            "fileName",
+            "serverFileName",
+            "extension",
+            "preview",
+            "type",
+            "uploadUrl",
+            "addDate",
+        ]

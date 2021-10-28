@@ -10,5 +10,5 @@ class MegaBinaryAdmin(admin.ModelAdmin):
 
 @admin.register(MegaFile)
 class MegaFileAdmin(admin.ModelAdmin):
-    list_display = ["fileName", "serverFileName", "binary"]
+    list_display = ["fileName", "type", "serverFileName", "binary"]
     readonly_fields = ["serverFileName"]
