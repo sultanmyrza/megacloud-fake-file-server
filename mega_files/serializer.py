@@ -93,3 +93,59 @@ class MegaListItemDirectorySerializer(serializers.ModelSerializer):
             "serverFileName",
             "addDate",
         ]
+
+
+class RenameFileRequestSerializer(serializers.Serializer):
+    fileName = serializers.CharField(max_length=120)
+
+
+class RenameFileResponseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MegaFile
+        fields = [
+            "id",
+            "fileName",
+            "serverFileName",
+            "extension",
+            "preview",
+            "type",
+            "uploadUrl",
+            "addDate",
+        ]
+
+
+class RenameFolderRequestSerializer(serializers.Serializer):
+    dirName = serializers.CharField(max_length=120)
+
+
+class RenameFolderResponseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MegaFile
+        fields = [
+            "id",
+            "fileName",
+            "type",
+            "addDate",
+        ]
+
+
+class MoveFileRequestSerializer(serializers.Serializer):
+    dirId = serializers.CharField()
+
+
+class MoveFileResponseSerializer(serializers.Serializer):
+    dir = RenameFolderResponseSerializer(read_only=True)
+
+    class Meta:
+        model = MegaFile
+        fields = [
+            "id",
+            "fileName",
+            "serverFileName",
+            "extension",
+            "preview",
+            "type",
+            "uploadUrl",
+            "addDate",
+            "dir",
+        ]

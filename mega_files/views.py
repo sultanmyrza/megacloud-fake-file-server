@@ -6,6 +6,7 @@ from django.conf import settings
 from django.db.models import F
 from django.http import HttpResponse
 from django.utils import timezone
+from mega_users import serializers
 from mega_users.decorators import check_mega_user_exists
 from mega_users.models import MegaUser
 from rest_framework import status
@@ -23,6 +24,12 @@ from .serializer import (
     GetTemporaryDownloadUrlResponse,
     MegaListItemDirectorySerializer,
     MegaListItemFileSerializer,
+    MoveFileRequestSerializer,
+    MoveFileResponseSerializer,
+    RenameFileRequestSerializer,
+    RenameFileResponseSerializer,
+    RenameFolderRequestSerializer,
+    RenameFolderResponseSerializer,
 )
 
 
@@ -329,3 +336,52 @@ def delete_by_id_file_or_directory(request, file_id, user_external_id):
     MegaFile.objects.get(id=file_id).delete()
     # TODO: delete binary file to free disk space
     return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(["PUT"])
+@check_mega_user_exists
+def rename_file(request, file_id, user_external_id):
+    # create serializer to extract params
+    serializer = RenameFileRequestSerializer(request.data)
+    if serializer.is_valid():
+        mega_file = MegaFile.objects.get(id=file_id)
+        mega_file.fileName = serializer.data["fileName"]
+        mega_file.save()
+
+    return Response(
+        data=RenameFileResponseSerializer(mega_file).data,
+        status=status.HTTP_200_OK,
+    )
+
+
+@api_view(["PUT"])
+@check_mega_user_exists
+def directory_file(request, dir_id, user_external_id):
+    # create serializer to extract params
+    serializer = RenameFolderRequestSerializer(request.data)
+    if serializer.is_valid():
+        mega_file = MegaFile.objects.get(id=dir_id)
+        mega_file.fileName = serializer.data["dirName"]
+        mega_file.save()
+
+    return Response(
+        data=RenameFolderResponseSerializer(mega_file).data,
+        status=status.HTTP_200_OK,
+    )
+
+
+@api_view(["PUT"])
+@check_mega_user_exists
+def move_file(request, file_id, user_external_id):
+    # create serializer to extract params
+    serializer = MoveFileRequestSerializer(request.data)
+    if serializer.is_valid():
+        mega_file = MegaFile.objects.get(id=file_id)
+        mega_dir = MegaFile.objects.get(id=serializers.data["dirId"])
+        mega_file.parent = mega_dir
+        mega_file.save()
+
+    return Response(
+        data=MoveFileResponseSerializer(mega_file).data,
+        status=status.HTTP_200_OK,
+    )

@@ -23,4 +23,19 @@ urlpatterns = [
         views.specific_directory_related_actions,
         name="specific_directory_related_actions",
     ),
+    path(
+        "api/v1/resource/files/file_id/users/user_external_id/action/rename",
+        views.rename_file,
+        name="rename_file",
+    ),
+    path(
+        "api/v1/resource/dir/dir_id/users/user_external_id/action/rename",
+        views.directory_file,
+        name="rename_file",
+    ),
+    path(
+        "api/v1/resource/files/file_id/users/user_external_id/action/move",
+        views.move_file,
+        name="move_file",
+    ),
 ]
