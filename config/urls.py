@@ -17,9 +17,17 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path
+from django.urls.conf import include
+from mega_files import urls as mega_files_urls
+from mega_files.views import download_file, upload_mega_binary_file
+from mega_users import urls as mega_users_urls
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("<uuid:user_external_id>/<str:server_file_name>", view=download_file),
+    path("<uuid:mega_file_id>/<str:file_name>", view=upload_mega_binary_file),
+    path("api/v1/", include(mega_files_urls)),
+    path("api/v1/", include(mega_users_urls)),
 ]
 
 if settings.DEBUG:
