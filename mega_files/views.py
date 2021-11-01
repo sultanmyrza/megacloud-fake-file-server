@@ -12,6 +12,7 @@ from mega_users.models import MegaUser
 from rest_framework import status
 from rest_framework.decorators import api_view, parser_classes
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from .models import MegaBinary, MegaFile
 from .parser import BinaryFileParser
@@ -194,8 +195,14 @@ def get_temporary_download_url(request, file_id, user_external_id):
     return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@api_view(["GET"])
-@check_mega_user_exists
+@api_view(["GET", "PUT"])
+def download_or_upload_file(request, id, file_name):
+    if request.method == "GET":
+        return download_file(request, id, file_name)
+    elif request.method == "PUT":
+        return upload_mega_binary_file(request, id, file_name)
+
+
 def download_file(request, user_external_id, server_file_name):
     mega_file = MegaFile.objects.get(serverFileName=server_file_name)
     mega_user = MegaUser.objects.get(external_id=user_external_id)
@@ -385,3 +392,70 @@ def move_file(request, file_id, user_external_id):
         data=MoveFileResponseSerializer(mega_file).data,
         status=status.HTTP_200_OK,
     )
+
+
+class DownloadUploadApiView(APIView):
+    parser_classes = [BinaryFileParser]
+
+    def get(self, request, id, file_name, format=None):
+        user_external_id = id
+        mega_file = MegaFile.objects.get(serverFileName=file_name)
+        mega_user = MegaUser.objects.get(external_id=user_external_id)
+
+        if mega_file.owner.id != mega_user.id:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+        expire_time = mega_file.downloadUrlExpireDate
+        current_time = timezone.now()
+
+        exp = expire_time.strftime("%m/%d/%Y, %H:%M:%S")
+        cur = current_time.strftime("%m/%d/%Y, %H:%M:%S")
+        print(exp)
+        print(cur)
+        # current_time = utc.localize(datetime.now())
+
+        if expire_time < current_time:
+
+            return HttpResponse(
+                f"""<?xml version="1.0" encoding="UTF-8"?>
+                    <Error>
+                        <Code>AccessDenied</Code>
+                        <Message>Request has expired</Message>
+                        <Key>{mega_file.fileName}</Key>
+                        <BucketName>06458601-7608-476e-86c5-42adc0c8aadb</BucketName>
+                        <Resource>{request.get_full_path()}</Resource>
+                        <RequestId>15CD363501E4EFEB</RequestId>
+                        <HostId>f687be98-fc29-4e53-bc4c-a540f9e0c193</HostId>
+                    </Error>
+                """,
+                content_type="text/xml",
+            )
+
+        document = open(mega_file.binary.data.path, "rb")
+        response = HttpResponse(FileWrapper(document), content_type="*/*")
+        response["Content-Disposition"] = 'attachment; filename="%s"' % mega_file.fileName
+        return response
+
+    def put(self, request, id, file_name, format=None):
+        mega_file_id = id
+        binary_data = request.data["file"]
+
+        mega_binary_file = MegaBinary()
+        mega_binary_file.data = binary_data
+        mega_binary_file.save()
+
+        # TODO: handel object does not exist case
+        mega_file = MegaFile.objects.get(id=mega_file_id)
+        mega_file.binary = mega_binary_file
+        meta = request.META
+        print(meta)
+        host = f"{ request.scheme }://{ request.META.get('HTTP_HOST') }"
+        if mega_file.extension.lower() in ["jpg", "jpeg", "png"]:
+            path = f"{mega_binary_file.data.url}"
+            previewUrl = f"{host}{path}"
+            mega_file.preview = previewUrl
+
+        mega_file.save()
+
+        # TODO: generate json reponse
+        return Response(status=status.HTTP_200_OK)
