@@ -255,7 +255,7 @@ def get_files_from_root_directory(request, user_external_id):
     field = request.query_params.get("field", "addDate")
 
     mega_files = (
-        mega_user.files.order_by(F(field).asc())
+        mega_user.files.filter(parent=None).order_by(F(field).asc())
         if direction == "asc"
         else mega_user.files.order_by(F(field).desc())
     )
